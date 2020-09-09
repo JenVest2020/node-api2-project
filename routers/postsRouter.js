@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Posts = require('../data/db.js');
-const { update } = require('../data/db');
+// const { update } = require('../data/db');
 
 
 
@@ -78,29 +78,28 @@ router.delete('/:id', (req, res) => {
 
 router.put('/:id', (req, res) => {
     const changes = req.body
-    if (!req.body.text || !req.body.contents) {
-        res.status(400).json({
-            errorMessage: "Please provide title and contents for the post."
+    Posts.update(req.params.id, changes)
+        .then(post => {
+            if (post) {
+                res.status(200).json(post);
+            } else {
+                res.status(400).json({
+                    errorMessage: "Please provide title and contents for the post."
+                });
+            }
         })
-    } else {
-        Posts.update(req.params.id, changes)
-            .then(changes => {
-                res.status(200).json(changes)
-            })
-            .catch(error => {
-                if (!req.params.id) {
-                    res.status(404).json({
-                        message: "The post with the specified ID does not exist."
-                    });
-                } else {
-                    console.log(error);
-                    res.status(500).json({
-                        error: "The post information could not be modified."
-                    })
-                }
-            });
-    }
-
+        .catch(error => {
+            if (!req.params.id) {
+                res.status(404).json({
+                    message: "The post with the specified ID does not exist."
+                });
+            } else {
+                console.log(error);
+                res.status(500).json({
+                    error: "The post information could not be modified."
+                })
+            }
+        });
 });
 
 router.get('/:id/comments', (req, res) => {
